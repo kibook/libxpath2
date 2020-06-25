@@ -1,0 +1,6 @@
+prefix=/usr/local
+
+Name: libxpath2
+Description: XPath 2.0 implementation for libxml2
+Version: 0.1
+Libs: ${prefix}/lib/libxpath2.so
