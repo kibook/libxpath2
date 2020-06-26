@@ -72,10 +72,27 @@ static void xpath2EndsWithFunction(xmlXPathParserContextPtr ctx, int nargs)
 	}
 }
 
+static void lowercase(xmlChar *s)
+{
+	int i;
+
+	for (i = 0; s[i]; ++i) {
+		s[i] = tolower(s[i]);
+	}
+}
+
+static void uppercase(xmlChar *s)
+{
+	int i;
+
+	for (i = 0; s[i]; ++i) {
+		s[i] = toupper(s[i]);
+	}
+}
+
 static void xpath2LowerCaseFunction(xmlXPathParserContextPtr ctx, int nargs)
 {
 	xmlChar *arg1;
-	int i;
 
 	if (nargs != 1) {
 		xmlXPathSetArityError(ctx);
@@ -84,43 +101,76 @@ static void xpath2LowerCaseFunction(xmlXPathParserContextPtr ctx, int nargs)
 
 	arg1 = xmlXPathPopString(ctx);
 
-	for (i = 0; arg1[i]; ++i) {
-		arg1[i] = tolower(arg1[i]);
-	}
+	lowercase(arg1);
 
 	xmlXPathReturnString(ctx, arg1);
 }
 
+static bool matches(const xmlChar *input, const xmlChar *pattern, const xmlChar *flags)
+{
+	xmlRegexpPtr regex;
+	bool ret;
+	xmlChar *i, *p;
+
+	i = xmlStrdup(input);
+	p = xmlStrdup(pattern);
+
+	if (xmlStrchr(flags, 'i')) {
+		lowercase(i);
+		lowercase(p);
+	}
+
+	regex = xmlRegexpCompile(p);
+	ret = xmlRegexpExec(regex, i);
+	xmlRegFreeRegexp(regex);
+
+	xmlFree(i);
+	xmlFree(p);
+
+	return ret;
+}
+
 static void xpath2MatchesFunction(xmlXPathParserContextPtr ctx, int nargs)
 {
-	xmlChar *arg1, *arg2;
-	xmlRegexpPtr regex;
+	xmlChar *arg1, *arg2, *arg3;
 
-	if (nargs != 2) {
+	if (nargs < 2 || nargs > 3) {
 		xmlXPathSetArityError(ctx);
 		return;
 	}
 
+	if (nargs > 2) {
+		arg3 = xmlXPathPopString(ctx);
+	} else {
+		arg3 = xmlCharStrdup("");
+	}
+
 	arg2 = xmlXPathPopString(ctx);
 	arg1 = xmlXPathPopString(ctx);
-	regex = xmlRegexpCompile(arg2);
 
-	xmlXPathReturnBoolean(ctx, xmlRegexpExec(regex, arg1));
+	xmlXPathReturnBoolean(ctx, matches(arg1, arg2, arg3));
 
-	xmlRegFreeRegexp(regex);
 	xmlFree(arg1);
 	xmlFree(arg2);
+	xmlFree(arg3);
 }
 
 static void xpath2TokenizeFunction(xmlXPathParserContextPtr ctx, int nargs)
 {
-	xmlChar *arg1, *arg2;
-	char *token = NULL, *end = NULL;
+	xmlChar *arg1, *arg2, *arg3;
 	xmlXPathObjectPtr obj;
+	int sep_start;
+	xmlChar *cur;
 
-	if (nargs < 1 || nargs > 2) {
+	if (nargs < 1 || nargs > 3) {
 		xmlXPathSetArityError(ctx);
 		return;
+	}
+
+	if (nargs > 2) {
+		arg3 = xmlXPathPopString(ctx);
+	} else {
+		arg3 = xmlCharStrdup("");
 	}
 
 	if (nargs > 1) {
@@ -128,26 +178,62 @@ static void xpath2TokenizeFunction(xmlXPathParserContextPtr ctx, int nargs)
 	} else {
 		arg2 = xmlCharStrdup(" ");
 	}
+
 	arg1 = xmlXPathPopString(ctx);
 
 	obj = xmlXPathNewNodeSet(NULL);
 
-	/* FIXME: strtok_r is a poor way to handle this. arg2 is a regexp, not
-	 *        necessarily a literal separator. */
-	while ((token = strtok_r(token ? NULL : (char *) arg1, (char *) arg2, &end))) {
-		xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(BAD_CAST token));
+	cur = arg1;
+
+	if (nargs < 2) {
+		while (isspace(cur[0])) ++cur;
+	}
+
+	sep_start = 0;
+
+	while (cur[sep_start] != '\0') {
+		int sep_end = xmlStrlen(cur);
+
+		while (cur[sep_end - 1] != '\0') {
+			xmlChar *sep   = xmlStrsub(cur, sep_start, sep_end - sep_start);
+			xmlChar *token = xmlStrsub(cur, 0, sep_start);
+
+			if (sep && matches(sep, arg2, arg3)) {
+				xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(token));
+				cur = cur + sep_start + xmlStrlen(sep);
+				sep_start = -1;
+				break;
+			}
+
+			--sep_end;
+		}
+
+		++sep_start;
+	}
+
+	if (nargs < 2) {
+		int i;
+		xmlChar *sub;
+
+		for (i = 0; !isspace(cur[i]); ++i);
+
+		if ((sub = xmlStrsub(cur, 0, i))) {
+			xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(sub));
+		}
+	} else {
+		xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(cur));
 	}
 
 	xmlXPathReturnNodeSet(ctx, obj->nodesetval);
 
 	xmlFree(arg1);
 	xmlFree(arg2);
+	xmlFree(arg3);
 }
 
 static void xpath2UpperCaseFunction(xmlXPathParserContextPtr ctx, int nargs)
 {
 	xmlChar *arg1;
-	int i;
 
 	if (nargs != 1) {
 		xmlXPathSetArityError(ctx);
@@ -156,9 +242,7 @@ static void xpath2UpperCaseFunction(xmlXPathParserContextPtr ctx, int nargs)
 
 	arg1 = xmlXPathPopString(ctx);
 
-	for (i = 0; arg1[i]; ++i) {
-		arg1[i] = toupper(arg1[i]);
-	}
+	uppercase(arg1);
 
 	xmlXPathReturnString(ctx, arg1);
 }

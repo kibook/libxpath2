@@ -70,6 +70,9 @@
               <para>matches($input, $pattern)</para>
             </listItem>
             <listItem>
+              <para>matches($input, $pattern, $flags)</para>
+            </listItem>
+            <listItem>
               <para>upper-case($arg)</para>
             </listItem>
             <listItem>
@@ -77,6 +80,9 @@
             </listItem>
             <listItem>
               <para>tokenize($input, $pattern)</para>
+            </listItem>
+            <listItem>
+              <para>tokenize($input, $pattern, $flags)</para>
             </listItem>
           </randomList>
         </para>

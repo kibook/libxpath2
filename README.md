@@ -23,8 +23,12 @@ FUNCTIONS
 
 -   matches($input, $pattern)
 
+-   matches($input, $pattern, $flags)
+
 -   upper-case($arg)
 
 -   tokenize($input)
 
 -   tokenize($input, $pattern)
+
+-   tokenize($input, $pattern, $flags)
