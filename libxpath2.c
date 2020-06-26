@@ -155,6 +155,16 @@ static void xpath2MatchesFunction(xmlXPathParserContextPtr ctx, int nargs)
 	xmlFree(arg3);
 }
 
+static xmlNodePtr newTextNode(xmlXPathParserContextPtr ctx, const xmlChar *val)
+{
+	xmlDocPtr doc;
+	xmlNodePtr node;
+	doc = ctx->context->doc;
+	node = xmlNewDocRawNode(doc, NULL, BAD_CAST "token", val);
+	xmlAddChild((xmlNodePtr) doc, node);
+	return node;
+}
+
 static void xpath2TokenizeFunction(xmlXPathParserContextPtr ctx, int nargs)
 {
 	xmlChar *arg1, *arg2, *arg3;
@@ -194,18 +204,25 @@ static void xpath2TokenizeFunction(xmlXPathParserContextPtr ctx, int nargs)
 	while (cur[sep_start] != '\0') {
 		int sep_end = xmlStrlen(cur);
 
-		while (cur[sep_end - 1] != '\0') {
+		while (sep_end > 0 && cur[sep_end - 1] != '\0') {
 			xmlChar *sep   = xmlStrsub(cur, sep_start, sep_end - sep_start);
 			xmlChar *token = xmlStrsub(cur, 0, sep_start);
 
 			if (sep && matches(sep, arg2, arg3)) {
-				xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(token));
+				xmlXPathNodeSetAddUnique(obj->nodesetval, newTextNode(ctx, token));
+
 				cur = cur + sep_start + xmlStrlen(sep);
 				sep_start = -1;
+
+				xmlFree(sep);
+				xmlFree(token);
 				break;
 			}
 
 			--sep_end;
+
+			xmlFree(sep);
+			xmlFree(token);
 		}
 
 		++sep_start;
@@ -215,16 +232,20 @@ static void xpath2TokenizeFunction(xmlXPathParserContextPtr ctx, int nargs)
 		int i;
 		xmlChar *sub;
 
-		for (i = 0; !isspace(cur[i]); ++i);
+		for (i = 0; cur[i] != '\0' && !isspace(cur[i]); ++i);
 
 		if ((sub = xmlStrsub(cur, 0, i))) {
-			xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(sub));
+			xmlXPathNodeSetAddUnique(obj->nodesetval, newTextNode(ctx, sub));
 		}
+
+		xmlFree(sub);
 	} else {
-		xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(cur));
+		xmlXPathNodeSetAddUnique(obj->nodesetval, newTextNode(ctx, cur));
 	}
 
 	xmlXPathReturnNodeSet(ctx, obj->nodesetval);
+
+	xmlXPathFreeNodeSetList(obj);
 
 	xmlFree(arg1);
 	xmlFree(arg2);
