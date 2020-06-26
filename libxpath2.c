@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <math.h>
+#include <string.h>
+#include <libxml/tree.h>
 #include <libxml/xpathInternals.h>
 #include <libxml/xmlregexp.h>
 #include <libxml/xmlstring.h>
@@ -110,6 +112,38 @@ static void xpath2MatchesFunction(xmlXPathParserContextPtr ctx, int nargs)
 	xmlFree(arg2);
 }
 
+static void xpath2TokenizeFunction(xmlXPathParserContextPtr ctx, int nargs)
+{
+	xmlChar *arg1, *arg2;
+	char *token = NULL, *end = NULL;
+	xmlXPathObjectPtr obj;
+
+	if (nargs < 1 || nargs > 2) {
+		xmlXPathSetArityError(ctx);
+		return;
+	}
+
+	if (nargs > 1) {
+		arg2 = xmlXPathPopString(ctx);
+	} else {
+		arg2 = xmlCharStrdup(" ");
+	}
+	arg1 = xmlXPathPopString(ctx);
+
+	obj = xmlXPathNewNodeSet(NULL);
+
+	/* FIXME: strtok_r is a poor way to handle this. arg2 is a regexp, not
+	 *        necessarily a literal separator. */
+	while ((token = strtok_r(token ? NULL : (char *) arg1, (char *) arg2, &end))) {
+		xmlXPathNodeSetAdd(obj->nodesetval, xmlNewText(BAD_CAST token));
+	}
+
+	xmlXPathReturnNodeSet(ctx, obj->nodesetval);
+
+	xmlFree(arg1);
+	xmlFree(arg2);
+}
+
 static void xpath2UpperCaseFunction(xmlXPathParserContextPtr ctx, int nargs)
 {
 	xmlChar *arg1;
@@ -137,4 +171,5 @@ void xpath2RegisterFunctions(xmlXPathContextPtr ctx)
 	xmlXPathRegisterFunc(ctx, BAD_CAST "lower-case", xpath2LowerCaseFunction);
 	xmlXPathRegisterFunc(ctx, BAD_CAST "matches", xpath2MatchesFunction);
 	xmlXPathRegisterFunc(ctx, BAD_CAST "upper-case", xpath2UpperCaseFunction);
+	xmlXPathRegisterFunc(ctx, BAD_CAST "tokenize", xpath2TokenizeFunction);
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dmodule>
+<dmodule xmlns:dc="http://www.purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.s1000d.org/S1000D_5-0/xml_schema_flat/descript.xsd">
+  <identAndStatusSection>
+    <dmAddress>
+      <dmIdent>
+        <dmCode modelIdentCode="LIBXPATH2" systemDiffCode="A" systemCode="00" subSystemCode="0" subSubSystemCode="0" assyCode="00" disassyCode="00" disassyCodeVariant="A" infoCode="040" infoCodeVariant="A" itemLocationCode="D"/>
+        <language languageIsoCode="en" countryIsoCode="CA"/>
+        <issueInfo issueNumber="000" inWork="01"/>
+      </dmIdent>
+      <dmAddressItems>
+        <issueDate year="2020" month="06" day="25"/>
+        <dmTitle>
+          <techName>libxpath2(3) | Library Functions Manual</techName>
+        </dmTitle>
+      </dmAddressItems>
+    </dmAddress>
+    <dmStatus issueType="new">
+      <security securityClassification="01"/>
+      <responsiblePartnerCompany>
+        <enterpriseName>khzae.net</enterpriseName>
+      </responsiblePartnerCompany>
+      <originator>
+        <enterpriseName>khzae.net</enterpriseName>
+      </originator>
+      <applic>
+        <displayText>
+          <simplePara>All</simplePara>
+        </displayText>
+      </applic>
+      <brexDmRef>
+        <dmRef>
+          <dmRefIdent>
+            <dmCode modelIdentCode="S1000D" systemDiffCode="G" systemCode="04" subSystemCode="1" subSubSystemCode="0" assyCode="0301" disassyCode="00" disassyCodeVariant="A" infoCode="022" infoCodeVariant="A" itemLocationCode="D"/>
+          </dmRefIdent>
+        </dmRef>
+      </brexDmRef>
+      <qualityAssurance>
+        <unverified/>
+      </qualityAssurance>
+    </dmStatus>
+  </identAndStatusSection>
+  <content>
+    <description>
+      <levelledPara>
+        <title>NAME</title>
+        <para>libxpath2 - Implementations of XPath 2.0 functions for libxml2</para>
+      </levelledPara>
+      <levelledPara>
+        <title>DESCRIPTION</title>
+        <para>The <emphasis>libxpath2</emphasis> library provides implementations of XPath 2.0 functions for the libxml2 XPath 1.0 parser in order to provide partial XPath 2.0 support to libxml2.</para>
+      </levelledPara>
+      <levelledPara>
+        <title>FUNCTIONS</title>
+        <para>
+          <randomList>
+            <listItem>
+              <para>abs($arg)</para>
+            </listItem>
+            <listItem>
+              <para>compare($comparand1, $comparand2)</para>
+            </listItem>
+            <listItem>
+              <para>ends-with($arg1, $arg2)</para>
+            </listItem>
+            <listItem>
+              <para>lower-case($arg)</para>
+            </listItem>
+            <listItem>
+              <para>matches($input, $pattern)</para>
+            </listItem>
+            <listItem>
+              <para>upper-case($arg)</para>
+            </listItem>
+            <listItem>
+              <para>tokenize($input)</para>
+            </listItem>
+            <listItem>
+              <para>tokenize($input, $pattern)</para>
+            </listItem>
+          </randomList>
+        </para>
+      </levelledPara>
+    </description>
+  </content>
+</dmodule>

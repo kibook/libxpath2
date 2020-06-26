@@ -1,4 +1,4 @@
-.PHONY: all clean install uninstall
+.PHONY: all clean docs maintainer-clean install uninstall
 
 PREFIX=/usr/local
 
@@ -17,8 +17,14 @@ all: libxpath2.so
 libxpath2.so: libxpath2.c
 	$(CC) $(CFLAGS) -o $@ $+ $(LDFLAGS)
 
+docs:
+	$(MAKE) -C doc
+
 clean:
 	rm -f libxpath2.so
+
+maintainer-clean: clean
+	$(MAKE) -C doc clean
 
 install:
 	cp libxpath2.so $(PREFIX)/lib
